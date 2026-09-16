@@ -1,1 +1,42 @@
-add ur c3c cookie here
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+app.get("/webhook", (req, res) => {
+  const VERIFY_TOKEN = "YOUR_VERIFY_TOKEN";
+
+  if (req.query["hub.verify_token"] === VERIFY_TOKEN) {
+    return res.send(req.query["hub.challenge"]);
+  }
+
+  res.sendStatus(403);
+});
+
+app.post("/webhook", (req, res) => {
+  const data = req.body;
+
+  if (data.object === "page") {
+    data.entry.forEach(entry => {
+      const event = entry.messaging?.[0];
+
+      if (event?.message) {
+        const senderId = event.sender.id;
+        const message = event.message.text;
+
+        console.log("Message:", message);
+        console.log("Sender:", senderId);
+
+        // এখানে তোমার auto-reply logic বসবে
+      }
+    });
+
+    return res.sendStatus(200);
+  }
+
+  res.sendStatus(404);
+});
+
+app.listen(3000, () => {
+  console.log("Bot running on port 3000");
+});
